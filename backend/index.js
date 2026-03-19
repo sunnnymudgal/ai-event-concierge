@@ -8,19 +8,22 @@ dotenv.config();
 
 const app = express();
 
-// ✅ CORS (important for Vercel)
+// FIX CORS (important for Vercel)
 app.use(cors({
-  origin: "*"
+  origin: "*", // or your vercel URL
 }));
 
 app.use(express.json());
 
-// ✅ MongoDB
+// DEBUG (temporary)
+console.log("ENV CHECK:", process.env.OPENROUTER_API_KEY ? "FOUND" : "MISSING");
+
+// MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log(err));
 
-// ✅ Schema
+// Schema
 const eventSchema = new mongoose.Schema({
   prompt: String,
   response: Object,
@@ -28,61 +31,43 @@ const eventSchema = new mongoose.Schema({
 
 const Event = mongoose.model("Event", eventSchema);
 
-// ✅ TEST ROUTE
-app.get("/", (req, res) => {
-  res.send("Backend is running ✅");
-});
-
-// ✅ AI GENERATE API
+// API
 app.post("/api/generate", async (req, res) => {
   try {
     const { prompt } = req.body;
 
+    if (!process.env.OPENROUTER_API_KEY) {
+      return res.status(500).json({ error: "API key missing" });
+    }
+
     const aiPrompt = `
-You are an AI event planner.
-
-Return ONLY valid JSON.
-
-Format:
+Return ONLY JSON:
 {
   "venueName": "",
   "location": "",
   "estimatedCost": "",
   "whyItFits": ""
 }
-
 User Request: ${prompt}
 `;
 
     const response = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
       {
-        model: "openchat/openchat-7b", // ✅ FREE + stable
-        messages: [
-          {
-            role: "user",
-            content: aiPrompt,
-          },
-        ],
+        model: "meta-llama/llama-3-8b-instruct",
+        messages: [{ role: "user", content: aiPrompt }],
       },
       {
         headers: {
           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": "https://ai-event-concierge-blue.vercel.app/", // 
-          "X-Title": "AI Event Concierge",
         },
       }
     );
 
     const text = response.data.choices[0].message.content;
 
-    console.log("AI RAW:", text);
-
-    const cleanText = text
-      .replace(/```json|```/g, "")
-      .replace(/<|>/g, "")
-      .trim();
+    const cleanText = text.replace(/```json|```/g, "").trim();
 
     let parsed;
 
@@ -90,18 +75,14 @@ User Request: ${prompt}
       parsed = JSON.parse(cleanText);
     } catch {
       parsed = {
-        venueName: "Suggested Venue",
+        venueName: "Fallback Venue",
         location: "Unknown",
         estimatedCost: "N/A",
-        whyItFits: "Fallback response due to formatting issue",
+        whyItFits: "AI returned invalid JSON",
       };
     }
 
-    // ✅ Save to DB
-    await Event.create({
-      prompt,
-      response: parsed,
-    });
+    await Event.create({ prompt, response: parsed });
 
     res.json(parsed);
 
@@ -111,25 +92,21 @@ User Request: ${prompt}
   }
 });
 
-// ✅ HISTORY
+// History
 app.get("/api/history", async (req, res) => {
   const data = await Event.find().sort({ createdAt: -1 });
   res.json(data);
 });
 
-// ✅ DELETE
+// Delete
 app.delete("/api/history/:id", async (req, res) => {
-  try {
-    await Event.findByIdAndDelete(req.params.id);
-    res.json({ message: "Deleted successfully" });
-  } catch {
-    res.status(500).json({ error: "Delete failed" });
-  }
+  await Event.findByIdAndDelete(req.params.id);
+  res.json({ message: "Deleted" });
 });
 
-// ✅ PORT (Render compatible)
+// PORT FIX
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on ${PORT}`);
+  console.log("Server running on", PORT);
 });
