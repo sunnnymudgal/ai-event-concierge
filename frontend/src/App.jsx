@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const API = "https://ai-event-backend.onrender.com";
+const API = "https://ai-event-concierge-xxih.onrender.com";
 
 function App() {
   const [input, setInput] = useState("");
