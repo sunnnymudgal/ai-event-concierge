@@ -7,7 +7,11 @@ import axios from "axios";
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "https://ai-event-concierge-blue.vercel.app",
+  methods: ["GET", "POST", "DELETE"],
+  allowedHeaders: ["Content-Type"]
+}));
 app.use(express.json());
 
 // MongoDB
@@ -22,6 +26,10 @@ const eventSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const Event = mongoose.model("Event", eventSchema);
+
+app.get("/", (req, res) => {
+  res.send("Backend is running ✅");
+});
 
 // API
 app.post("/api/generate", async (req, res) => {
