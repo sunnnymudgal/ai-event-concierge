@@ -29,7 +29,7 @@ function App() {
 
     setLoading(true);
     setResult(null);
-
+    
     try {
       const res = await axios.post(`${API}/api/generate`, {
         prompt: input,

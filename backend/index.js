@@ -7,19 +7,20 @@ import axios from "axios";
 dotenv.config();
 
 const app = express();
+
+// ✅ CORS (important for Vercel)
 app.use(cors({
-  origin: "https://ai-event-concierge-blue.vercel.app",
-  methods: ["GET", "POST", "DELETE"],
-  allowedHeaders: ["Content-Type"]
+  origin: "*"
 }));
+
 app.use(express.json());
 
-// MongoDB
+// ✅ MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log(err));
 
-// Schema
+// ✅ Schema
 const eventSchema = new mongoose.Schema({
   prompt: String,
   response: Object,
@@ -27,11 +28,12 @@ const eventSchema = new mongoose.Schema({
 
 const Event = mongoose.model("Event", eventSchema);
 
+// ✅ TEST ROUTE
 app.get("/", (req, res) => {
   res.send("Backend is running ✅");
 });
 
-// API
+// ✅ AI GENERATE API
 app.post("/api/generate", async (req, res) => {
   try {
     const { prompt } = req.body;
@@ -55,20 +57,27 @@ User Request: ${prompt}
     const response = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
       {
-        model: "meta-llama/llama-3-8b-instruct",
-        messages: [{ role: "user", content: aiPrompt }],
+        model: "openchat/openchat-7b", // ✅ FREE + stable
+        messages: [
+          {
+            role: "user",
+            content: aiPrompt,
+          },
+        ],
       },
       {
         headers: {
           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": "https://your-vercel-app.vercel.app", // 🔥 important
+          "HTTP-Referer": "https://ai-event-concierge-blue.vercel.app/", // 
           "X-Title": "AI Event Concierge",
         },
       }
     );
 
     const text = response.data.choices[0].message.content;
+
+    console.log("AI RAW:", text);
 
     const cleanText = text
       .replace(/```json|```/g, "")
@@ -88,33 +97,37 @@ User Request: ${prompt}
       };
     }
 
-    await Event.create({ prompt, response: parsed });
+    // ✅ Save to DB
+    await Event.create({
+      prompt,
+      response: parsed,
+    });
 
     res.json(parsed);
 
   } catch (err) {
-    console.log(err.response?.data || err.message);
+    console.log("FULL ERROR:", err.response?.data || err.message);
     res.status(500).json({ error: "AI failed" });
   }
 });
 
-// History
+// ✅ HISTORY
 app.get("/api/history", async (req, res) => {
   const data = await Event.find().sort({ createdAt: -1 });
   res.json(data);
 });
 
-// Delete
+// ✅ DELETE
 app.delete("/api/history/:id", async (req, res) => {
   try {
     await Event.findByIdAndDelete(req.params.id);
     res.json({ message: "Deleted successfully" });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Delete failed" });
   }
 });
 
-// ✅ ONLY ONE LISTEN
+// ✅ PORT (Render compatible)
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
