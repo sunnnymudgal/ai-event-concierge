@@ -8,9 +8,9 @@ dotenv.config();
 
 const app = express();
 
-// FIX CORS (important for Vercel)
+// FIX CORS 
 app.use(cors({
-  origin: "*", // or your vercel URL
+  origin: "*", 
 }));
 
 app.use(express.json());

@@ -9,7 +9,7 @@ function App() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // 📦 Fetch history
+  //  Fetch history
   const fetchHistory = async () => {
     try {
       const res = await axios.get(`${API}/api/history`);
@@ -23,13 +23,13 @@ function App() {
     fetchHistory();
   }, []);
 
-  // 🤖 Generate AI result
+  //  Generate AI result
   const handleSubmit = async () => {
     if (!input.trim()) return;
 
     setLoading(true);
     setResult(null);
-    
+
     try {
       const res = await axios.post(`${API}/api/generate`, {
         prompt: input,
@@ -45,7 +45,7 @@ function App() {
     setLoading(false);
   };
 
-  // ❌ Delete history
+  //  Delete history
   const handleDelete = async (id) => {
     if (!confirm("Delete this item?")) return;
 
@@ -92,7 +92,7 @@ function App() {
       {/* LOADING */}
       {loading && (
         <div className="text-center text-zinc-400 mb-6 animate-pulse">
-          🤖 AI is planning your event...
+           AI is planning your event...
         </div>
       )}
 
