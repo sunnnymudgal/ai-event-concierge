@@ -23,8 +23,6 @@ const eventSchema = new mongoose.Schema({
 
 const Event = mongoose.model("Event", eventSchema);
 
-
-
 // API
 app.post("/api/generate", async (req, res) => {
   try {
@@ -35,17 +33,12 @@ You are an AI event planner.
 
 Return ONLY valid JSON.
 
-Rules:
-- Do NOT include any symbols like < or >
-- Do NOT include explanation
-- Output must be valid JSON
-
 Format:
 {
-  "venueName": "string",
-  "location": "string",
-  "estimatedCost": "string",
-  "whyItFits": "string"
+  "venueName": "",
+  "location": "",
+  "estimatedCost": "",
+  "whyItFits": ""
 }
 
 User Request: ${prompt}
@@ -54,39 +47,40 @@ User Request: ${prompt}
     const response = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
       {
-       model: "meta-llama/llama-3-8b-instruct",
+        model: "meta-llama/llama-3-8b-instruct",
         messages: [{ role: "user", content: aiPrompt }],
       },
       {
         headers: {
           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
+          "HTTP-Referer": "https://your-vercel-app.vercel.app", // 🔥 important
+          "X-Title": "AI Event Concierge",
         },
       }
     );
 
     const text = response.data.choices[0].message.content;
 
-    // console.log("AI RAW:", text);
-
-    // Clean JSON
-    const cleanText = text.replace(/```json|```/g, "").trim();
+    const cleanText = text
+      .replace(/```json|```/g, "")
+      .replace(/<|>/g, "")
+      .trim();
 
     let parsed;
 
     try {
       parsed = JSON.parse(cleanText);
     } catch {
-      return res.status(500).json({
-        error: "Invalid JSON",
-        raw: text,
-      });
+      parsed = {
+        venueName: "Suggested Venue",
+        location: "Unknown",
+        estimatedCost: "N/A",
+        whyItFits: "Fallback response due to formatting issue",
+      };
     }
 
-    await Event.create({
-      prompt,
-      response: parsed,
-    });
+    await Event.create({ prompt, response: parsed });
 
     res.json(parsed);
 
@@ -102,18 +96,19 @@ app.get("/api/history", async (req, res) => {
   res.json(data);
 });
 
-app.listen(5000, () => console.log("Server running on 5000"));
-
-//  Delete single history item
+// Delete
 app.delete("/api/history/:id", async (req, res) => {
   try {
-    const { id } = req.params;
-
-    await Event.findByIdAndDelete(id);
-
+    await Event.findByIdAndDelete(req.params.id);
     res.json({ message: "Deleted successfully" });
   } catch (err) {
-    console.log(err);
     res.status(500).json({ error: "Delete failed" });
   }
+});
+
+// ✅ ONLY ONE LISTEN
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on ${PORT}`);
 });
