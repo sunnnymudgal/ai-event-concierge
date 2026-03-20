@@ -3,6 +3,7 @@ import axios from "axios";
 import { RxCross1 } from "react-icons/rx";
 import { RiRobot3Fill } from "react-icons/ri";
 import { FaLocationDot } from "react-icons/fa6";
+import { SiCodemagic } from "react-icons/si";
 
 const API = "https://ai-event-concierge-xxih.onrender.com";
 
@@ -47,7 +48,7 @@ function App() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Delete this item?")) return;
+    // if (!confirm("Delete this item?")) return;
 
     try {
       await axios.delete(`${API}/api/history/${id}`);
@@ -62,7 +63,7 @@ function App() {
       {/* HEADER */}
       <header className="text-center mb-10 sm:mb-12">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent">
-           Event Concierge
+          <SiCodemagic /> Event Concierge
         </h1>
         <p className="text-zinc-400 mt-2 text-sm sm:text-base">
           AI-powered venue scouting and event planning
