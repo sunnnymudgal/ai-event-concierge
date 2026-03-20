@@ -62,8 +62,9 @@ function App() {
     <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 px-4 sm:px-6 md:px-10 py-10 sm:py-16 font-sans">
       {/* HEADER */}
       <header className="text-center mb-10 sm:mb-12">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent">
-          <SiCodemagic /> Event Concierge
+        <h1 className="flex items-center justify-center gap-2 text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent">
+          <SiCodemagic className="text-white text-2xl sm:text-3xl" />
+          Event Concierge
         </h1>
         <p className="text-zinc-400 mt-2 text-sm sm:text-base">
           AI-powered venue scouting and event planning
@@ -91,8 +92,9 @@ function App() {
 
       {/* LOADING */}
       {loading && (
-        <div className="text-center text-zinc-400 mb-6 animate-pulse text-sm sm:text-base">
-          <RiRobot3Fill /> AI is planning your event...
+        <div className="flex items-center justify-center gap-2 text-zinc-400 mb-6 animate-pulse text-sm sm:text-base">
+          <RiRobot3Fill className="text-blue-400 text-lg" />
+          AI is planning your event...
         </div>
       )}
 
@@ -109,8 +111,9 @@ function App() {
             </span>
           </div>
 
-          <p className="text-zinc-400 mb-3 text-sm sm:text-base">
-            <FaLocationDot /> {result.location}
+          <p className="flex items-center gap-2 text-zinc-400 mb-3 text-sm sm:text-base">
+            <FaLocationDot className="text-red-400" />
+            {result.location}
           </p>
 
           <p className="text-zinc-300 text-sm sm:text-base leading-relaxed">
@@ -134,7 +137,7 @@ function App() {
               {/* DELETE */}
               <button
                 onClick={() => handleDelete(item._id)}
-                className="absolute top-2 right-2 text-red-400 text-xs hover:text-red-300"
+                className="absolute top-2 right-2 text-red-400 hover:text-red-300 text-sm"
               >
                 <RxCross1 />
               </button>
