@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { RxCross1 } from "react-icons/rx";
+import { RiRobot3Fill } from "react-icons/ri";
+import { FaLocationDot } from "react-icons/fa6";
 
 const API = "https://ai-event-concierge-xxih.onrender.com";
 
@@ -56,11 +59,10 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 px-4 sm:px-6 md:px-10 py-10 sm:py-16 font-sans">
-
       {/* HEADER */}
       <header className="text-center mb-10 sm:mb-12">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent">
-          ✨ Event Concierge
+           Event Concierge
         </h1>
         <p className="text-zinc-400 mt-2 text-sm sm:text-base">
           AI-powered venue scouting and event planning
@@ -89,14 +91,13 @@ function App() {
       {/* LOADING */}
       {loading && (
         <div className="text-center text-zinc-400 mb-6 animate-pulse text-sm sm:text-base">
-          🤖 AI is planning your event...
+          <RiRobot3Fill /> AI is planning your event...
         </div>
       )}
 
       {/* RESULT */}
       {result && !loading && (
         <div className="max-w-3xl mx-auto bg-zinc-900 border border-zinc-700 p-4 sm:p-6 rounded-xl mb-8 sm:mb-10 shadow-lg">
-          
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4">
             <h2 className="text-xl sm:text-2xl font-bold text-white">
               {result.venueName}
@@ -108,7 +109,7 @@ function App() {
           </div>
 
           <p className="text-zinc-400 mb-3 text-sm sm:text-base">
-            📍 {result.location}
+            <FaLocationDot /> {result.location}
           </p>
 
           <p className="text-zinc-300 text-sm sm:text-base leading-relaxed">
@@ -129,13 +130,12 @@ function App() {
               key={item._id}
               className="relative bg-zinc-900 border border-zinc-800 p-4 rounded-xl hover:bg-zinc-800 transition"
             >
-              
               {/* DELETE */}
               <button
                 onClick={() => handleDelete(item._id)}
                 className="absolute top-2 right-2 text-red-400 text-xs hover:text-red-300"
               >
-                ✕
+                <RxCross1 />
               </button>
 
               <p className="text-xs text-zinc-500 mb-2 italic truncate">
@@ -153,7 +153,6 @@ function App() {
           ))}
         </div>
       </div>
-
     </div>
   );
 }
